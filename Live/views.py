@@ -1,39 +1,69 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Match, Over, Batting, Extra
-from .serializers import MatchSerializer, OverSerializer, BattingSerializer, ExtraSerializer
 from rest_framework.views import APIView
 from django.contrib.auth import login, logout
+from .models import Match, Over, Batting, Extra
+from .serializers import MatchSerializer, OverSerializer, BattingSerializer, ExtraSerializer, UserRegisterSerializer, UserLoginSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
 from .serializers import UserRegisterSerializer, UserLoginSerializer
 
+User = get_user_model()
 
-# ------------------- User API -------------------
+# ------------------- Register -------------------
 class RegisterAPI(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ------------------- Login -------------------
 class LoginAPI(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            login(request, user)
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+
+            return Response({
+                "message": "Login successful",
+                "access": access_token,
+                "refresh": refresh_token
+            }, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ------------------- Logout -------------------
 class LogoutAPI(APIView):
-    def post(self, request):
-        logout(request)
-        return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        try:
+            # Blacklist the refresh token
+            refresh_token = request.data.get("refresh")
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Requires SimpleJWT blacklist app enabled
+            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # ------------------- Match API -------------------
 @api_view(['GET', 'POST'])
@@ -89,10 +119,7 @@ def over_api(request):
         return Response({"message": "No Over found"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'POST':
-        if over:
-            serializer = OverSerializer(over, data=request.data)
-        else:
-            serializer = OverSerializer(data=request.data)
+        serializer = OverSerializer(over, data=request.data) if over else OverSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -168,10 +195,7 @@ def extra_singleton_api(request):
         return Response({"message": "No Extra found"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'POST':
-        if extra:
-            serializer = ExtraSerializer(extra, data=request.data)
-        else:
-            serializer = ExtraSerializer(data=request.data)
+        serializer = ExtraSerializer(extra, data=request.data) if extra else ExtraSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -193,18 +217,42 @@ def extra_singleton_api(request):
         return Response({"message": "Extra deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 
-# ------------------- Total Score API -------------------
+# ------------------- Dashboard View (Public) -------------------
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def total_score(request):
-    batting_total = sum(b.runs_scored for b in Batting.objects.all())
-    extra_total = sum(e.extra_runs for e in Extra.objects.all())
-    total = batting_total + extra_total
+@permission_classes([AllowAny])  # Public access
+def dashboard_view(request):
+    # Matches
+    matches = Match.objects.all()
+    match_serializer = MatchSerializer(matches, many=True)
 
+    # Over (singleton)
+    over = Over.objects.first()
+    over_serializer = OverSerializer(over) if over else None
+
+    # Batting
+    batters = Batting.objects.all()
+    batting_serializer = BattingSerializer(batters, many=True)
+
+    # Extra (singleton)
+    extra = Extra.objects.first()
+    extra_serializer = ExtraSerializer(extra) if extra else None
+
+    # Total score calculation
+    batting_total = sum(b.runs_scored for b in batters)
+    extra_total = sum(e.extra_runs for e in Extra.objects.all()) if extra else 0
+    total_score = batting_total + extra_total
+
+    # Combined data
     data = {
-        "batting_total": batting_total,
-        "extra_total": extra_total,
-        "total_score": total
+        "matches": match_serializer.data,
+        "over": over_serializer.data if over_serializer else None,
+        "batting": batting_serializer.data,
+        "extra": extra_serializer.data if extra_serializer else None,
+        "score": {
+            "batting_total": batting_total,
+            "extra_total": extra_total,
+            "total_score": total_score
+        }
     }
 
     return Response(data)

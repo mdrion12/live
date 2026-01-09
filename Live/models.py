@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
-
     email = models.EmailField(unique=True)   
     def __str__(self):
         return self.username
@@ -13,8 +12,8 @@ class Match(models.Model):
     first_team = models.CharField(max_length=100)
     second_team = models.CharField(max_length=100)
     match_time = models.DateTimeField()
-    first_team_image = models.ImageField(upload_to='team_images/')
-    second_team_image = models.ImageField(upload_to='team_images/')
+    first_team_image = models.ImageField(upload_to='team_images/', blank=True, null=True)
+    second_team_image = models.ImageField(upload_to='team_images/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_team} vs {self.second_team} at {self.match_time}"
