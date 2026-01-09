@@ -11,8 +11,8 @@ from django.http import JsonResponse
 def create_superuser(request):
     # Temporary view, remove after use!
     username = "reon"
-    password = "YourStrongPassword123"
-    email = "reon@example.com"
+    password = "reon128633"
+    email = "reon128633@gmail.com"
     
     if not User.objects.filter(username=username).exists():
         User.objects.create_superuser(username=username, email=email, password=password)
