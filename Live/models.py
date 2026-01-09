@@ -1,4 +1,11 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+class CustomUser(AbstractUser):
+
+    email = models.EmailField(unique=True)   
+    def __str__(self):
+        return self.username
+
 
 # Create your models here.
 class Match(models.Model):
@@ -11,8 +18,6 @@ class Match(models.Model):
 
     def __str__(self):
         return f"{self.first_team} vs {self.second_team} at {self.match_time}"
-
-
 class Over(models.Model):
     over_number = models.IntegerField()  # কমা সরানো
 
