@@ -5,6 +5,20 @@ from rest_framework import status
 from .models import Match, Over, Batting, Extra
 from .serializers import MatchSerializer, OverSerializer, BattingSerializer, ExtraSerializer
 
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+
+def create_superuser(request):
+    # Temporary view, remove after use!
+    username = "reon"
+    password = "YourStrongPassword123"
+    email = "reon@example.com"
+    
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, email=email, password=password)
+        return JsonResponse({"status": "success", "message": "Superuser created"})
+    else:
+        return JsonResponse({"status": "exists", "message": "User already exists"})
 
 # Match List & Create
 @api_view(['GET', 'POST'])
