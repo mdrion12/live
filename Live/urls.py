@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/batting/<int:pk>/', views.batting_detail, name='batting_detail'),
     path('api/extra/', views.extra_singleton_api, name='extra_singleton_api'),
     path('batting/total_score/', views.total_score, name='total_score'),
+    path('create-superuser/', views.create_superuser),
 ]
