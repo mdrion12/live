@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-4edz-!gipv+cvnbn^owe@u^xj$bh6xo^_7#8!s_g0&$c1rzu&&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["onrender.com"]
+ALLOWED_HOSTS = ["live-5-8npb.onrender.com", "127.0.0.1", "localhost"]
 
 AUTH_USER_MODEL = 'Live.CustomUser'
 
