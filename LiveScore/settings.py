@@ -5,26 +5,36 @@ from pathlib import Path
 # -------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # -------------------------
 # SECURITY
 # -------------------------
 SECRET_KEY = 'django-insecure-4edz-!gipv+cvnbn^owe@u^xj$bh6xo^_7#8!s_g0&$c1rzu&&'
 DEBUG = False
-ALLOWED_HOSTS = ["live-5-8npb.onrender.com", "127.0.0.1", "localhost"]
+
+ALLOWED_HOSTS = [
+    "live-5-8npb.onrender.com",
+    "127.0.0.1",
+    "localhost",
+    "sloppy-roof.surge.sh",
+]
+
 
 # -------------------------
 # AUTH
 # -------------------------
 AUTH_USER_MODEL = 'Live.CustomUser'
 
+
 # -------------------------
-# REST FRAMEWORK
+# REST FRAMEWORK (JWT)
 # -------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
 
 # -------------------------
 # INSTALLED APPS
@@ -36,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'Live',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -43,6 +54,7 @@ INSTALLED_APPS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # -------------------------
 # MIDDLEWARE
@@ -60,6 +72,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'LiveScore.urls'
+
 
 # -------------------------
 # TEMPLATES
@@ -81,6 +94,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LiveScore.wsgi.application'
 
+
 # -------------------------
 # DATABASE
 # -------------------------
@@ -90,6 +104,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 # -------------------------
 # PASSWORD VALIDATION
@@ -101,6 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+
 # -------------------------
 # INTERNATIONALIZATION
 # -------------------------
@@ -109,27 +125,36 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
 # -------------------------
-# STATIC FILES
+# STATIC FILES (WhiteNoise)
 # -------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'       # production static files
+STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Enable WhiteNoise to serve static files in production
+# Enable WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# -------------------------
-# CORS
-# -------------------------
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",                 # React dev server
-    "https://sloppy-roof.surge.sh",          # Deployed frontend
-]
 
 # -------------------------
-# END
+# CORS (For React / Surge)
 # -------------------------
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://sloppy-roof.surge.sh",
+]
+
+CORS_ALLOW_HEADERS = [
+    'authorization',
+    'content-type',
+    'accept',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
