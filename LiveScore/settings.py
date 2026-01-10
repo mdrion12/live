@@ -75,7 +75,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'LiveScore.wsgi.application'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React dev server
-    "https://MyCricket.com",  # deployed frontend
+    "https://sloppy-roof.surge.sh",  # deployed frontend
 ]
 
 
