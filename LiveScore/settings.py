@@ -37,12 +37,14 @@ INSTALLED_APPS = [
     'Live',
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 # settings.py এর নিচে
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -53,6 +55,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'LiveScore.urls'
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -70,6 +73,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'LiveScore.wsgi.application'
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # React dev server
+    "https://MyCricket.com",  # deployed frontend
+]
 
 
 # Database
