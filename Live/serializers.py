@@ -7,13 +7,13 @@ from .models import CustomUser
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'password')
+
     def create(self, validated_data):
-        # Singleton check
-        if CustomUser.objects.exists():
-            raise serializers.ValidationError("User already exists. Please login.")
+        # Normal user creation without singleton restriction
         user = CustomUser.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
